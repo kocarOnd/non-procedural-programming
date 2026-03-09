@@ -1,3 +1,9 @@
+/* Task: Write a Prolog predicate roman(N, R) that is true if N is an integer 
+in the range 0..3999 and R is a list of atoms containing the Roman numeral 
+representation of the same integer. (If N is 0, R should be the empty list.)
+
+Your predicate must work and terminate in all directions.*/
+
 table(T) :- T =
     [
         1000 : [m], 900 : [c, m],
