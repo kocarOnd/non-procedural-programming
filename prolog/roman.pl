@@ -10,7 +10,14 @@ table(T) :- T =
     ].
 
 convert(0, [], _).
-# TODO: convert :- recursive calling
+
+convert(N, R, [V : L| Rt]) :- 
+    N >= V, M is N - V,
+    append(L, Rr, R),
+    convert(M, Rr, [V : L| Rt]).
+
+convert(N, R, [V : _| Rt]) :-
+    N > 0, N < V, convert(N, R, Rt).
 
 roman(N, R) :-
     between(0, 3999, N),
