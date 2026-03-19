@@ -1,5 +1,14 @@
 decrypt(C, D, M) :- 
-    split_string(C, " ", " ", EncryptedWords).
+    split_string(C, " ", " ", EncryptedWords),
+    decrypt_all(EncryptedWords, D, DecryptedWords, _, _),
+    atomics_to_string(DecryptedWords, " ", M).
+
+
+decrypt_all([], _, [], _, _).
+decrypt_all([E | ETail], Dictionary, [D | DTail], K1, K2) :-
+    member(D, Dictionary),
+    decrypt_word(E, D, K1, K2),
+    decrypt_all(ETail, Dictionary, DTail, K1, K2).
 
 decrypt_word(E, D, K1, K2) :-
     string_codes(E, ECodes),
