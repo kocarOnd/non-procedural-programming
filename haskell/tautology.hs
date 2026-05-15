@@ -1,3 +1,25 @@
+{-Task:You have studied the propositional calculus in a previous course 
+about logic.
+
+We can represent a propositional formula in Haskell using this datatype:
+
+data Prop = 
+    Const Bool
+  | Var Char
+  | Not Prop
+  | And Prop Prop
+  | Or Prop Prop
+  deriving Show
+
+Recall that a tautology is a propositional formula that is true for every 
+possible assignment of Boolean values to variables.
+
+Define a Haskell function
+
+isTaut :: Prop -> Bool
+
+that determines whether a proposition is a tautology.-}
+
 import Data.Maybe (fromJust)
 import Data.List (nub)
 
