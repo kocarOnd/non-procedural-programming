@@ -102,5 +102,4 @@ valid_pair(Name1-Var1, [Name2-Var2 | Rest]) :-
     
     (End1 + TravelTime #=< Start2) #\/ (End2 + TravelTime #=< Start1),
     
-    % Continue the loop
     valid_pair(Name1-Var1, Rest).
