@@ -17,19 +17,41 @@ building_id(BuildingName, ID) :-
 
 /*HELPER FUNCTIONS*/
 
-/*Parse the time from human-friendly format to machine-friendly*/
-course_minutes(Name, GroupId, StartTotal, EndTotal) :-
-    course(Name, GroupId, Day, StartHour:StartMin, EndHour:EndMin, _),
-    day_value(Day, DayInt),
-    StartTotal is ((DayInt * 24) + StartHour) * 60 + StartMin,
-    EndTotal is ((DayInt * 24) + EndHour) * 60 + EndMin.
-
-/Make distances bidirectional*/
+/*Make distances bidirectional*/
 travel_time(Building, Building, 0). 
-travel_time(A, B, Time) :- distance(A, B, Time). % A to B
-travel_time(A, B, Time) :- distance(B, A, Time). % B to A
+travel_time(A, B, Time) :- distance(A, B, Time). 
+travel_time(A, B, Time) :- distance(B, A, Time). 
 
 /*TURNING DATA TO CSP*/
+
+/*Build table of travel distances*/
+travel_tuples(TravelTable) :-
+    findall(
+        [ID1, ID2, Time],
+        (
+            travel_time(BldgA, BldgB, Time),
+            
+            building_id(BldgA, ID1),
+            building_id(BldgB, ID2)
+        ),
+        TravelTable
+    ).
+
+course_tuples(Name, Tuples) :-
+    findall(
+        [ID, Start, End, BldgInt], 
+        (
+            course(Name, ID, Day, StartH:StartM, EndH:EndM, Room),
+            
+            room(BldgName, Room),
+            building_id(BldgName, BldgInt),
+            
+            day_value(Day, DayInt),
+            Start is ((DayInt * 24) + StartH) * 60 + StartM,
+            End is ((DayInt * 24) + EndH) * 60 + EndM
+        ), 
+        Tuples
+    ).
 
 /*Fetch a set of course names*/
 all_courses(Courses) :-
@@ -62,9 +84,23 @@ solve(Schedule) :-
 valid_schedule([]).
 valid_schedule([Pair|Rest]) :-
     valid_pair(Pair, Rest),
-    valid_schedule(Rest)
+    valid_schedule(Rest).
 
 valid_pair(_, []).
-valid_pair(Name1-Var1, [Name2-Var2|Rest]) :-
-    /*some constraints for a pair of variables*/
+valid_pair(Name1-Var1, [Name2-Var2 | Rest]) :-
+    course_tuples(Name1, Tuples1),
+    course_tuples(Name2, Tuples2),
+
+    [Start1, End1, Bldg1] ins 0..10000, 
+    [Start2, End2, Bldg2] ins 0..10000,
+    
+    tuples_in([[Var1, Start1, End1, Bldg1]], Tuples1),
+    tuples_in([[Var2, Start2, End2, Bldg2]], Tuples2),
+    
+    travel_tuples(TravelTable),
+    tuples_in([[Bldg1, Bldg2, TravelTime]], TravelTable),
+    
+    (End1 + TravelTime #=< Start2) #\/ (End2 + TravelTime #=< Start1),
+    
+    % Continue the loop
     valid_pair(Name1-Var1, Rest).
