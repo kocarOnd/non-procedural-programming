@@ -10,18 +10,33 @@ StartHour, StartMin: When the course begins
 EndHour, EndMin    : When the course ends
 Room               : In what room it takes place*/
 
-course(mathematical_analysis, 1, monday, 9:00, 10:30, k1).
-course(mathematical_analysis_tutorial, 1, monday, 10:40, 12:10, k3).
-course(linear_algebra, 1, tuesday, 10:40, 12:10, s5).
-course(linear_algebra_tutorial, 1, tuesday, 12:20, 13:50, s9).
-course(ads, 1, wednesday, 14:00, 15:30, s3).
-course(ads_tutorial, 1, wednesday, 15:40, 17:10, s3).
-course(programming, 1, thursday, 9:00, 10:30, s1).
-course(programming_tutorial, 1, thursday, 10:40, 12:10, su1).
-course(deep_learning, 1, friday, 9:00, 10:30, s1).
-course(deep_learning_tutorial, 1, friday, 10:40, 12:10, su2).
-course(computer_architecture, 1, tuesday, 14:00, 15:30, s4).
-course(discrete_mathematics, 1, wednesday, 9:00, 10:30, s1).
+course(calculus_1, 1, monday, 9:00, 10:30, k1).
+course(calculus_1, 2, tuesday, 14:00, 15:30, k2).
+course(calculus_1, 3, wednesday, 10:40, 12:10, k1).
+
+course(calculus_1_tutorial, 1, monday, 10:40, 12:10, k3).
+course(calculus_1_tutorial, 2, tuesday, 15:40, 17:10, k4).
+course(calculus_1_tutorial, 3, wednesday, 12:20, 13:50, k3).
+
+course(physics_1, 1, monday, 9:00, 10:30, f1). 
+course(physics_1, 2, thursday, 9:00, 10:30, f1).
+
+course(physics_1_tutorial, 1, monday, 10:40, 12:10, f2). 
+course(physics_1_tutorial, 2, thursday, 10:40, 12:10, f2).
+
+course(intro_to_programming, 1, monday, 14:00, 15:30, s1).
+course(intro_to_programming, 2, wednesday, 9:00, 10:30, s1).
+
+course(intro_to_programming_lab, 1, monday, 15:40, 17:10, su1).
+course(intro_to_programming_lab, 2, wednesday, 10:40, 12:10, su1).
+
+course(algorithms, 1, tuesday, 9:00, 10:30, s3).
+course(algorithms, 2, thursday, 14:00, 15:30, s3).
+
+course(discrete_math, 1, tuesday, 14:00, 15:30, s5).
+course(discrete_math, 2, friday, 9:00, 10:30, s5).
+
+course(english_it, 1, friday, 10:40, 12:10, n1).
 
 /*Buildings Settings*/
 /*building(x), distance(x, y, time-in-minutes), room(building, x)*/
