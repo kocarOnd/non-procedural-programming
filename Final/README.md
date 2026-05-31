@@ -6,7 +6,7 @@ Prolog-based tool that helps students generate possible schedules with no overla
 
 ## Requirements
 
-- [SWI-Prolog](https://www.swi-prolog.org/) (version 8.0 or later recommended)
+- [SWI-Prolog](https://www.swi-prolog.org/) (version 8.0+)
 
 Note: No additional libraries need to be installed; the CLP(FD) library ships with SWI-Prolog.
 
