@@ -38,6 +38,7 @@ travel_tuples(TravelTable) :-
         TravelTable
     ).
 
+/*Find all possibilities for some course and return it as a list of tuples (table)*/
 course_tuples(Name, Tuples) :-
     findall(
         [ID, Start, End, BldgInt], 
@@ -69,6 +70,22 @@ build_variables([], []).
 build_variables([Name|Names], [VarPair|VarPairs]) :-
     course_domain(Name, VarPair),
     build_variables(Names, VarPairs).
+
+/*SORTING LOGIC*/
+
+/*attach_time(InputValue, Key-InputValue) - to use the keysort*/
+attach_time(Name-GroupID, StartTotal-(Name-GroupID)) :-
+    course(Name, GroupID, Day, StartH:StartM, _, _),
+            
+    day_value(Day, DayInt),
+    StartTotal is ((DayInt * 24) + StartH) * 60 + StartM.
+
+sort_schedule(Schedule, SortedSchedule) :-
+    maplist(attach_time, Schedule, KeyedSchedule),
+    
+    keysort(KeyedSchedule, SortedKeyedSchedule),
+    
+    pairs_values(SortedKeyedSchedule, SortedSchedule).
      
 /*MAIN SOLVER LOGIC*/
 
@@ -82,7 +99,9 @@ solve(Schedule) :-
     
     labeling([], VarsOnly),
 
-    print_schedule(Schedule).
+    sort_schedule(Schedule, SortedSchedule),
+
+    print_schedule(SortedSchedule).
 
 valid_schedule([]).
 valid_schedule([Pair|Rest]) :-
