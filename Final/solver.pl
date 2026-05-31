@@ -1,5 +1,6 @@
 :- use_module(data).
 :- use_module(library(clpfd)).
+:- use_module(view).
 
 /*TURNING ATOMS TO INTEGERS*/
 
@@ -79,7 +80,9 @@ solve(Schedule) :-
     
     valid_schedule(Schedule),
     
-    labeling([], VarsOnly).
+    labeling([], VarsOnly),
+
+    print_schedule(Schedule).
 
 valid_schedule([]).
 valid_schedule([Pair|Rest]) :-
