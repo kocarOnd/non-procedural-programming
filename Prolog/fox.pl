@@ -34,22 +34,23 @@ solve(Start, N) :-
     goal(G),
     empty_assoc(Empty),
     put_assoc(Start, Empty, root, Visited),
-    bfs([[Start, 0]], G, Visited, N).
+    QueueHead = [[Start, 0] | Tail],
+    bfs(QueueHead-Tail, G, Visited, N).
 
-bfs([[G, N] | _], G, Visited, N) :-
+bfs([[G, N] | _]-_, G, Visited, N) :-
     reconstruct_path(G, Visited, Path),
     reverse(Path, ForwardPath),
     print_path(ForwardPath),
     !.
 
-bfs([[Current, D] | RestQueue], G, Visited, N) :-
+bfs([[Current, D] | RestQueue]-QueueTail, G, Visited, N) :-
     findall(Next, tah(Current, Next), Neighbors),
     exclude(visited(Visited), Neighbors, Unvisited),
     add_visited(Unvisited, Current, Visited, NewVisited),
     NextD is D + 1,
     findall([U, NextD], member(U, Unvisited), NewItems),
-    append(RestQueue, NewItems, NewQueue),
-    bfs(NewQueue, G, NewVisited, N).
+    append(NewItems, NewTail, QueueTail),
+    bfs(RestQueue-NewTail, G, NewVisited, N).
 
 visited(As, S) :- get_assoc(S, As, _).
 
