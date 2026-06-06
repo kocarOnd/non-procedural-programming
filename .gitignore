@@ -10,6 +10,7 @@ cabal-dev/
 .cabal-sandbox/
 cabal.sandbox.config
 .ghc.environment.*
+sandbox.*
 
 *~
 *.swp
