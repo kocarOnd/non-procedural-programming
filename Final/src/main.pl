@@ -71,7 +71,7 @@ build_variables([Name|Names], [VarPair|VarPairs]) :-
     course_domain(Name, VarPair),
     build_variables(Names, VarPairs).
 
-/*SORTING LOGIC*/
+/*COURSE SORTING LOGIC*/
 
 /*attach_time(InputValue, Key-InputValue) - to use the keysort*/
 attach_time(Name-GroupID, StartTotal-(Name-GroupID)) :-
@@ -86,6 +86,10 @@ sort_schedule(Schedule, SortedSchedule) :-
     keysort(KeyedSchedule, SortedKeyedSchedule),
     
     pairs_values(SortedKeyedSchedule, SortedSchedule).
+
+/*SCHEDULE SORTING LOGIC*/
+
+/*TODO: Attach a number to every schedule that evaluates it's usability and sort schedules based on that usability*/
      
 /*MAIN SOLVER LOGIC*/
 
