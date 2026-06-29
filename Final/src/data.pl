@@ -10,33 +10,24 @@ StartHour, StartMin: When the course begins
 EndHour, EndMin    : When the course ends
 Room               : In what room it takes place*/
 
-course(calculus_1, 1, monday, 9:00, 10:30, k1).
-course(calculus_1, 2, tuesday, 14:00, 15:30, k2).
-course(calculus_1, 3, wednesday, 10:40, 12:10, k1).
+course(linear_algebra, 1, monday, 8:00, 9:30, k1).
+course(linear_algebra, 2, monday, 10:40, 12:10, k1).
 
-course(calculus_1_tutorial, 1, monday, 10:40, 12:10, k3).
-course(calculus_1_tutorial, 2, tuesday, 15:40, 17:10, k4).
-course(calculus_1_tutorial, 3, wednesday, 12:20, 13:50, k3).
+course(database_systems, 1, wednesday, 18:30, 20:00, s1).
+course(database_systems, 2, wednesday, 19:15, 20:45, s1).
 
-course(physics_1, 1, monday, 9:00, 10:30, f1). 
-course(physics_1, 2, thursday, 9:00, 10:30, f1).
+course(computer_graphics, 1, friday, 8:00, 9:30, s3).
+course(computer_graphics, 2, friday, 14:10, 15:40, s3).
 
-course(physics_1_tutorial, 1, monday, 10:40, 12:10, f2). 
-course(physics_1_tutorial, 2, thursday, 10:40, 12:10, f2).
+course(software_eng, 1, tuesday, 10:40, 12:10, s5).
+course(software_eng, 2, thursday, 10:40, 12:10, s5).
 
-course(intro_to_programming, 1, monday, 14:00, 15:30, s1).
-course(intro_to_programming, 2, wednesday, 9:00, 10:30, s1).
+course(ai_basics, 1, tuesday, 13:10, 14:40, s5).
+course(ai_basics, 2, thursday, 12:20, 13:50, s5).
 
-course(intro_to_programming_lab, 1, monday, 15:40, 17:10, su1).
-course(intro_to_programming_lab, 2, wednesday, 10:40, 12:10, su1).
-
-course(algorithms, 1, tuesday, 9:00, 10:30, s3).
-course(algorithms, 2, thursday, 14:00, 15:30, s3).
-
-course(discrete_math, 1, tuesday, 14:00, 15:30, s5).
-course(discrete_math, 2, friday, 9:00, 10:30, s5).
-
-course(english_it, 1, friday, 10:40, 12:10, n1).
+course(quantum_computing, 1, wednesday, 10:00, 11:30, t1).
+course(quantum_computing, 2, wednesday, 12:30, 14:00, f1).
+course(quantum_computing, 3, wednesday, 14:30, 16:00, f1).
 
 /*Buildings Settings*/
 /*building(x), distance(x, y, time-in-minutes), room(building, x)*/
