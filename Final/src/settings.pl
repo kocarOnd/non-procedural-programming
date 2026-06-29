@@ -10,11 +10,11 @@
 /*Avoids options starting before the defined hour*/
 is_morning_avoided(10).
 
-/*Avoids options starting after the defined hour*/
+/*Avoids options ending after the defined hour*/
 is_evening_avoided(20).
 
 /*Ascertains that every day will have at least 30 minutes of free time between 10:00 and 14:00*/
-% is_lunch_necessary.
+is_lunch_necessary.
 
 /*SORTING SETTINGS*/
 
