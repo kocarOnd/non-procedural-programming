@@ -51,42 +51,44 @@ check_lunch_breaks(_) :-
     true.
 
 
-find_info(Name-GroupID, [Name, GroupID, Day, Stime, Etime, Building]) :-
+find_info(Name-GroupID, class(Name, GroupID, Day, Stime, Etime, Building)) :-
     course(Name, GroupID, Day, Shour:Smin, Ehour:Emin, Room),
     Stime is Shour * 60 + Smin,
     Etime is Ehour * 60 + Emin,
     room(Building, Room).
 
-extract_day([_, _, Day, _, _, _], Day).
+extract_day(class(_, _, Day, _, _, _), Day).
 
 check_valid_days([], _).
 check_valid_days([Day | Days], ExpandedSchedule) :-
     findall(Class, 
         (
             member(Class, ExpandedSchedule), 
-            Class = [_, _, Day, _, _, _]
+            Class = class(_, _, Day, _, _, _)
         ), 
         DailyClasses),
     sort(4, @=<, DailyClasses, SortedClasses),
 
-    (
-        (
-            SortedClasses = [[_, _, _, Stime, Etime, _]],
-            (Stime >= 630; Etime =< 810)
-        );
-        (
-            SortedClasses = [_ | Rest],
-            any(check_pair_gap, SortedClasses, Rest)
-        ); 
-        (
-            SortedClasses = [FirstClass | _],
-            FirstClass = [_, _, _, Stime, _, _],
-            Stime >= 630
-        );
-        (
-            last(SortedClasses, LastClass),
-            LastClass = [_, _, _, _, Etime, _],
-            Etime =< 810
+    once(
+       (
+            (
+                SortedClasses = [class(_, _, _, Stime, Etime, _)],
+                (Stime >= 630; Etime =< 810)
+            );
+            (
+                SortedClasses = [_ | Rest],
+                any(check_pair_gap, SortedClasses, Rest)
+            ); 
+            (
+                SortedClasses = [FirstClass | _],
+                FirstClass = class(_, _, _, Stime, _, _),
+                Stime >= 630
+            );
+            (
+                last(SortedClasses, LastClass),
+                LastClass = class(_, _, _, _, Etime, _),
+                Etime =< 810
+            )
         )
     ),
     check_valid_days(Days, ExpandedSchedule).
@@ -98,8 +100,8 @@ any(Pred, [_|Xs], [_|Ys]) :-
     any(Pred, Xs, Ys).
 
 check_pair_gap(Class1, Class2) :- 
-    Class1 = [_, _, _, _, Etime, Bldg1],
-    Class2 = [_, _, _, Stime, _, Bldg2],
+    Class1 = class(_, _, _, _, Etime, Bldg1),
+    Class2 = class(_, _, _, Stime, _, Bldg2),
 
     travel_time(Bldg1, Bldg2, TravelTime),
 
@@ -190,13 +192,17 @@ solve(Schedule) :-
     
     valid_schedule(Schedule),
     
-    labeling([], VarsOnly),
-
-    check_lunch_breaks(Schedule),
-
-    sort_schedule(Schedule, SortedSchedule),
-
-    print_schedule(SortedSchedule).
+    findall(
+        Schedule, 
+        (
+            labeling([], VarsOnly),
+            check_lunch_breaks(Schedule)
+        ), 
+        AllValidSchedules
+    ),
+    
+    length(AllValidSchedules, Count),
+    format('~n[INFO] Found ~w valid schedules!~n', [Count]).
 
 valid_schedule([]).
 valid_schedule([Pair|Rest]) :-
