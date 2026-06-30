@@ -26,8 +26,9 @@ course(ai_basics, 1, tuesday, 13:10, 14:40, s5).
 course(ai_basics, 2, thursday, 12:20, 13:50, s5).
 
 course(quantum_computing, 1, wednesday, 10:00, 11:30, t1).
-course(quantum_computing, 2, wednesday, 12:30, 14:00, f1).
-course(quantum_computing, 3, wednesday, 14:30, 16:00, f1).
+
+course(deep_learning, 1, wednesday, 12:30, 14:00, f1).
+course(deep_learning, 2, wednesday, 14:30, 16:00, f1).
 
 /*Buildings Settings*/
 /*building(x), distance(x, y, time-in-minutes), room(building, x)*/
