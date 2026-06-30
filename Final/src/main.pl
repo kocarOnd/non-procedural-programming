@@ -24,6 +24,20 @@ travel_time(Building, Building, 0).
 travel_time(A, B, Time) :- distance(A, B, Time). 
 travel_time(A, B, Time) :- distance(B, A, Time). 
 
+any(Pred, [X|_], [Y|_]) :-
+    call(Pred, X, Y),
+    !. 
+any(Pred, [_|Xs], [_|Ys]) :-
+    any(Pred, Xs, Ys).
+
+find_info(Name-GroupID, class(Name, GroupID, Day, Stime, Etime, Building)) :-
+    course(Name, GroupID, Day, Shour:Smin, Ehour:Emin, Room),
+    Stime is Shour * 60 + Smin,
+    Etime is Ehour * 60 + Emin,
+    room(Building, Room).
+
+/*ADDITIONAL CONDITIONS LOGIC*/
+
 morning_condition(SHour) :-
     is_morning_avoided(Limit), !,
     SHour >= Limit.
@@ -49,13 +63,6 @@ check_lunch_breaks(Schedule) :-
     check_valid_days(UniqueDays, ExpandedSchedule).
 check_lunch_breaks(_) :-
     true.
-
-
-find_info(Name-GroupID, class(Name, GroupID, Day, Stime, Etime, Building)) :-
-    course(Name, GroupID, Day, Shour:Smin, Ehour:Emin, Room),
-    Stime is Shour * 60 + Smin,
-    Etime is Ehour * 60 + Emin,
-    room(Building, Room).
 
 extract_day(class(_, _, Day, _, _, _), Day).
 
@@ -92,12 +99,6 @@ check_valid_days([Day | Days], ExpandedSchedule) :-
         )
     ),
     check_valid_days(Days, ExpandedSchedule).
-
-any(Pred, [X|_], [Y|_]) :-
-    call(Pred, X, Y),
-    !. 
-any(Pred, [_|Xs], [_|Ys]) :-
-    any(Pred, Xs, Ys).
 
 check_pair_gap(Class1, Class2) :- 
     Class1 = class(_, _, _, _, Etime, Bldg1),
