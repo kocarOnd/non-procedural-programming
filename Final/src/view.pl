@@ -1,4 +1,4 @@
-:- module(view, [print_schedule/1]).
+:- module(view, [print_in_chunks/2]).
 :- use_module(data).
 
 /*Add 0 when printing time with less than 10 minutes*/
@@ -7,6 +7,21 @@ print_time(Hour, Minute) :-
     format('~w:0~w', [Hour, Minute]).
 print_time(Hour, Minute) :-
     format('~w:~w', [Hour, Minute]).
+
+split_list(List, N, Chunk, Rest) :-
+    length(List, Length),
+    Length >= N, !,
+    length(Chunk, N),
+    append(Chunk, Rest, List).
+split_list(List, _, List, []).
+
+print_in_chunks(List, N) :-
+    split_list(List, N, Chunk, _),
+    maplist(print_schedule, Chunk).
+print_in_chunks(List, N) :-
+    split_list(List, N, _, Rest),
+    Rest \= [],
+    print_in_chunks(Rest, N).
 
 print_schedule(Schedule) :-
     format('~n===================================================================~n'),
