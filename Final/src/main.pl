@@ -275,6 +275,9 @@ solve(Schedule) :-
         AllValidSchedules
     ),
 
+    length(AllValidSchedules, ScheduleCount),
+    format('Found ~w possible schedules', [ScheduleCount]),
+
     maplist(keysort_list_by(attach_time), AllValidSchedules, OrganisedSchedules),
     keysort_list_by(score_schedule, OrganisedSchedules, SortedSchedules),
 
