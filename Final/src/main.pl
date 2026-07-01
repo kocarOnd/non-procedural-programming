@@ -23,18 +23,21 @@ travel_time(Building, Building, 0).
 travel_time(A, B, Time) :- distance(A, B, Time). 
 travel_time(A, B, Time) :- distance(B, A, Time). 
 
+/*Returns true if predicate succeeds on any couple from given lists*/
 any(Pred, [X|_], [Y|_]) :-
     call(Pred, X, Y),
     !. 
 any(Pred, [_|Xs], [_|Ys]) :-
     any(Pred, Xs, Ys).
 
+/*Creates a predicate holding all course info from Name-GroupID couple*/
 find_info(Name-GroupID, class(Name, GroupID, Day, Stime, Etime, Building)) :-
     course(Name, GroupID, Day, Shour:Smin, Ehour:Emin, Room),
     Stime is Shour * 60 + Smin,
     Etime is Ehour * 60 + Emin,
     room(Building, Room).
 
+/*Sorts a List using keysort with the given predicate generating the keys*/
 keysort_list_by(Predicate, List, SortedList) :-
     maplist(Predicate, List, KeyedList), 
 
@@ -44,10 +47,12 @@ keysort_list_by(Predicate, List, SortedList) :-
 
 extract_day(class(_, _, Day, _, _, _), Day).
 
+/*Extracts all unique days from a schedule expanded by find_info/2*/
 get_unique_days(ExpandedSchedule, UniqueDays) :-
     maplist(extract_day, ExpandedSchedule, AllDays),
     sort(AllDays, UniqueDays).
 
+/*Returns the desired length of a chunk to be printed*/
 get_max_schedules_limit(N) :-
     max_results(N), !.
 get_max_schedules_limit(N) :-
@@ -55,12 +60,14 @@ get_max_schedules_limit(N) :-
 
 /*ADDITIONAL CONDITIONS LOGIC*/
 
+/*Evaluates the morning condition based on settings.pl values*/
 morning_condition(SHour) :-
     is_morning_avoided(Limit), !,
     SHour >= Limit.
 morning_condition(_) :- 
     true.
 
+/*Evaluates the evening condition based on settings.pl values*/
 evening_condition(EHour, Eminute) :-
     is_evening_avoided(Limit), !,
     (
@@ -70,6 +77,7 @@ evening_condition(EHour, Eminute) :-
 evening_condition(_, _) :-
     true.
 
+/*Evaluates the lunch condition based on settings.pl values*/
 check_lunch_breaks(Schedule) :-
     is_lunch_necessary, !,
     maplist(find_info, Schedule, ExpandedSchedule),
@@ -80,6 +88,7 @@ check_lunch_breaks(Schedule) :-
 check_lunch_breaks(_) :-
     true.
 
+/*Checks that for every day in Days, there is at least 30 minutes of break between 10:00 and 14:00*/
 check_valid_days([], _).
 check_valid_days([Day | Days], ExpandedSchedule) :-
     findall(Class, 
@@ -92,28 +101,25 @@ check_valid_days([Day | Days], ExpandedSchedule) :-
 
     once(
        (
-            (
-                SortedClasses = [class(_, _, _, Stime, Etime, _)],
-                (Stime >= 630; Etime =< 810)
-            );
-            (
-                SortedClasses = [_ | Rest],
-                any(check_pair_gap, SortedClasses, Rest)
-            ); 
-            (
+            ( /*Case 1: Uni starts after 10:30*/
                 SortedClasses = [FirstClass | _],
                 FirstClass = class(_, _, _, Stime, _, _),
                 Stime >= 630
             );
-            (
+            ( /*Case 2: Uni finishes before 13:30*/
                 last(SortedClasses, LastClass),
                 LastClass = class(_, _, _, _, Etime, _),
                 Etime =< 810
-            )
+            );
+            ( /*Case 3: There is a 30 minute gap between 2 classes*/
+                SortedClasses = [_ | Rest],
+                any(check_pair_gap, SortedClasses, Rest)
+            ) 
         )
     ),
     check_valid_days(Days, ExpandedSchedule).
 
+/*Ascertains that the gap between Class1 and Class2 is 30 minutes long within 10 to 14 window*/
 check_pair_gap(Class1, Class2) :- 
     Class1 = class(_, _, _, _, Etime, Bldg1),
     Class2 = class(_, _, _, Stime, _, Bldg2),
@@ -177,13 +183,6 @@ build_variables([Name|Names], [VarPair|VarPairs]) :-
     course_domain(Name, VarPair),
     build_variables(Names, VarPairs).
 
-sort_schedule(Schedule, SortedSchedule) :- % Deprecated, use keysort_list_by(Predicate, List, SortedList)
-    maplist(attach_time, Schedule, KeyedSchedule),
-    
-    keysort(KeyedSchedule, SortedKeyedSchedule),
-    
-    pairs_values(SortedKeyedSchedule, SortedSchedule).
-
 /*SORTING LOGIC*/
 
 /*attach_time(InputValue, Key-InputValue) - to use the keysort*/
@@ -193,6 +192,7 @@ attach_time(Name-GroupID, StartTotal-(Name-GroupID)) :-
     day_value(Day, DayInt),
     StartTotal is ((DayInt * 24) + StartH) * 60 + StartM.
 
+/*Evaluates a schedule and attaches the score to it*/
 score_schedule(Schedule, ScoredPair) :-
     sorted_by(compact), !,
 
@@ -226,11 +226,13 @@ score_schedule(Schedule, ScoredPair) :- /*Default behaviour is just compact scor
 
     ScoredPair = Sum-Schedule.
 
+/*Turns day into a value of how unsought it is (Mo-Fr = 25-16-9-16-25)*/
 evaluate_day(Day, DayEvaluation) :-
     day_value(Day, DayInt),
 
     DayEvaluation is (abs(DayInt - 2) + 3) ^ 2.
 
+/*Calculates the amount of transit time on one specific day*/
 daily_transit(ExpandedSchedule, Day, TotalDailyTime) :-
     findall(Class, 
         (
@@ -243,6 +245,7 @@ daily_transit(ExpandedSchedule, Day, TotalDailyTime) :-
     
     sum_transitions(SortedClasses, TotalDailyTime).
 
+/*Sums the transition time in a list of consequent classes*/
 sum_transitions([], 0).
 sum_transitions([_], 0).
 sum_transitions([C1, C2 | Rest], TotalTime) :-
@@ -278,11 +281,13 @@ solve(Schedule) :-
     get_max_schedules_limit(N),
     print_in_chunks(SortedSchedules, N).
 
+/*Ascertain that the schedule comply with the constraints*/
 valid_schedule([]).
 valid_schedule([Pair|Rest]) :-
     valid_pair(Pair, Rest),
     valid_schedule(Rest).
 
+/*Ascertains that a pair of classes comply with the constraints*/
 valid_pair(_, []).
 valid_pair(Name1-Var1, [Name2-Var2 | Rest]) :-
     course_tuples(Name1, Tuples1),

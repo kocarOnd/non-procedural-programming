@@ -8,6 +8,7 @@ print_time(Hour, Minute) :-
 print_time(Hour, Minute) :-
     format('~w:~w', [Hour, Minute]).
 
+/*Takes a chunk of length N out of a list*/
 split_list(List, N, Chunk, Rest) :-
     length(List, Length),
     Length >= N, !,
@@ -15,6 +16,7 @@ split_list(List, N, Chunk, Rest) :-
     append(Chunk, Rest, List).
 split_list(List, _, List, []).
 
+/*Prints a list of schedules in chunks of length N*/
 print_in_chunks(List, N) :-
     split_list(List, N, Chunk, _),
     maplist(print_schedule, Chunk).
