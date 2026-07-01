@@ -11,8 +11,7 @@ day_value(wednesday, 2).
 day_value(thursday, 3).
 day_value(friday, 4).
 
-/*I am turning building atoms from data to integers for clpfd
-dynamically, because the amount of buildings may change for different data*/
+/*Turning building atoms from data to integers for clpfd*/
 building_id(BuildingName, ID) :-
     setof(B, building(B), AllBuildings),
     nth1(ID, AllBuildings, BuildingName). 
@@ -36,6 +35,24 @@ find_info(Name-GroupID, class(Name, GroupID, Day, Stime, Etime, Building)) :-
     Etime is Ehour * 60 + Emin,
     room(Building, Room).
 
+keysort_list_by(Predicate, List, SortedList) :-
+    maplist(Predicate, List, KeyedList), 
+
+    keysort(KeyedList, SortedKeyedList),
+
+    pairs_values(SortedKeyedList, SortedList).
+
+extract_day(class(_, _, Day, _, _, _), Day).
+
+get_unique_days(ExpandedSchedule, UniqueDays) :-
+    maplist(extract_day, ExpandedSchedule, AllDays),
+    sort(AllDays, UniqueDays).
+
+get_max_schedules_limit(N) :-
+    max_results(N), !.
+get_max_schedules_limit(N) :-
+    N = 5.
+
 /*ADDITIONAL CONDITIONS LOGIC*/
 
 morning_condition(SHour) :-
@@ -57,14 +74,11 @@ check_lunch_breaks(Schedule) :-
     is_lunch_necessary, !,
     maplist(find_info, Schedule, ExpandedSchedule),
 
-    maplist(extract_day, ExpandedSchedule, AllDays),
-    sort(AllDays, UniqueDays),
+    get_unique_days(ExpandedSchedule, UniqueDays),
 
     check_valid_days(UniqueDays, ExpandedSchedule).
 check_lunch_breaks(_) :-
     true.
-
-extract_day(class(_, _, Day, _, _, _), Day).
 
 check_valid_days([], _).
 check_valid_days([Day | Days], ExpandedSchedule) :-
@@ -163,7 +177,14 @@ build_variables([Name|Names], [VarPair|VarPairs]) :-
     course_domain(Name, VarPair),
     build_variables(Names, VarPairs).
 
-/*COURSE SORTING LOGIC*/
+sort_schedule(Schedule, SortedSchedule) :- % Deprecated, use keysort_list_by(Predicate, List, SortedList)
+    maplist(attach_time, Schedule, KeyedSchedule),
+    
+    keysort(KeyedSchedule, SortedKeyedSchedule),
+    
+    pairs_values(SortedKeyedSchedule, SortedSchedule).
+
+/*SORTING LOGIC*/
 
 /*attach_time(InputValue, Key-InputValue) - to use the keysort*/
 attach_time(Name-GroupID, StartTotal-(Name-GroupID)) :-
@@ -172,25 +193,74 @@ attach_time(Name-GroupID, StartTotal-(Name-GroupID)) :-
     day_value(Day, DayInt),
     StartTotal is ((DayInt * 24) + StartH) * 60 + StartM.
 
-sort_schedule(Schedule, SortedSchedule) :-
-    maplist(attach_time, Schedule, KeyedSchedule),
-    
-    keysort(KeyedSchedule, SortedKeyedSchedule),
-    
-    pairs_values(SortedKeyedSchedule, SortedSchedule).
+score_schedule(Schedule, ScoredPair) :-
+    sorted_by(compact), !,
 
-/*SCHEDULE SORTING LOGIC*/
+    maplist(find_info, Schedule, ExpandedSchedule),
 
-/*TODO: Attach a number to every schedule that evaluates it's usability and sort schedules based on that usability*/
+    get_unique_days(ExpandedSchedule, UniqueDays),
+
+    maplist(evaluate_day, UniqueDays, DayValues),
+
+    sum_list(DayValues, Sum),
+
+    ScoredPair = Sum-Schedule.
+score_schedule(Schedule, ScoredPair) :-
+    sorted_by(transit), !,
+
+    maplist(find_info, Schedule, ExpandedSchedule),
+    get_unique_days(ExpandedSchedule, UniqueDays),
+    
+    maplist(daily_transit(ExpandedSchedule), UniqueDays, DailyTransits),
+    
+    sum_list(DailyTransits, Sum),
+    ScoredPair = Sum-Schedule.
+score_schedule(Schedule, ScoredPair) :- /*Default behaviour is just compact scoring for now*/
+    maplist(find_info, Schedule, ExpandedSchedule),
+
+    get_unique_days(ExpandedSchedule, UniqueDays),
+
+    maplist(evaluate_day, UniqueDays, DayValues),
+
+    sum_list(DayValues, Sum),
+
+    ScoredPair = Sum-Schedule.
+
+evaluate_day(Day, DayEvaluation) :-
+    day_value(Day, DayInt),
+
+    DayEvaluation is (abs(DayInt - 2) + 3) ^ 2.
+
+daily_transit(ExpandedSchedule, Day, TotalDailyTime) :-
+    findall(Class, 
+        (
+            member(Class, ExpandedSchedule), 
+            Class = class(_, _, Day, _, _, _)
+        ), 
+        DailyClasses),
+        
+    sort(4, @=<, DailyClasses, SortedClasses),
+    
+    sum_transitions(SortedClasses, TotalDailyTime).
+
+sum_transitions([], 0).
+sum_transitions([_], 0).
+sum_transitions([C1, C2 | Rest], TotalTime) :-
+    C1 = class(_, _, _, _, _, Bldg1),
+    C2 = class(_, _, _, _, _, Bldg2),
+    
+    travel_time(Bldg1, Bldg2, Time),
+    
+    sum_transitions([C2 | Rest], RestTime),
+    
+    TotalTime is Time + RestTime.
      
 /*MAIN SOLVER LOGIC*/
 
 solve(Schedule) :-
     all_courses(CourseNames),
     build_variables(CourseNames, Schedule),
-    
     pairs_values(Schedule, VarsOnly),
-    
     valid_schedule(Schedule),
     
     findall(
@@ -201,9 +271,12 @@ solve(Schedule) :-
         ), 
         AllValidSchedules
     ),
-    
-    length(AllValidSchedules, Count),
-    format('~n[INFO] Found ~w valid schedules!~n', [Count]).
+
+    maplist(keysort_list_by(attach_time), AllValidSchedules, OrganisedSchedules),
+    keysort_list_by(score_schedule, OrganisedSchedules, SortedSchedules),
+
+    get_max_schedules_limit(N),
+    print_in_chunks(SortedSchedules, N).
 
 valid_schedule([]).
 valid_schedule([Pair|Rest]) :-
@@ -227,3 +300,6 @@ valid_pair(Name1-Var1, [Name2-Var2 | Rest]) :-
     (End1 + TravelTime #=< Start2) #\/ (End2 + TravelTime #=< Start1),
     
     valid_pair(Name1-Var1, Rest).
+
+run :- 
+    solve(_).
