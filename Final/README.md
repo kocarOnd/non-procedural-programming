@@ -20,7 +20,7 @@ Note: No additional libraries need to be installed; the CLP(FD) library ships wi
 │   ├── settings.pl   # User-controlled settings of the solver
 │   ├── validator.pl  # Data integrity checker
 │   └── view.pl       # Logic for schedule printing
-└── docs/             # Additional documentation for developers
+└── developer.md      # Additional documentation for developers
 ```
 
 ## Quick Start
